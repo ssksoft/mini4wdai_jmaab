@@ -636,6 +636,17 @@ def _pyc_import(root):
     return sil_core
 
 
+def check_env(root=None):
+    """Environment check of THIS project (no path to type):  py import m4wd_drive as D; D.check_env()
+    runs MiniAI_PySim/tools/check_env.py of the same repository as this m4wd_drive.py; results go to the Output Log"""
+    import runpy
+    path = os.path.join(root or PY_ROOT, "tools", "check_env.py")
+    if not os.path.exists(path):
+        unreal.log_error("[M4WD] check_env.py が見つかりません: " + path)
+        return
+    runpy.run_path(path, run_name="__main__")
+
+
 def start_py(controller, params=None, battery="nimh2", motor="standard", mass=0.135, slow=0.25, imu_axes="x,y,z",
              noise=True, seed=0, laps=0, boot=0.0, lane=0, root=None):
     """Drive the car with a Python controller.  Call in the Output Log (Python) BEFORE pressing Play, e.g.

@@ -122,11 +122,19 @@ mini4wdai_jmaab/
 
 ### 4.1 環境チェック（最初に1回）
 
-レベルを開いた状態（**Play していない状態**）で、画面下の **出力ログ** の入力欄（「Cmd」）に次を入力して Enter を押します。パスは自分の環境に合わせてください。
+レベルを開いた状態（**Play していない状態**）で、画面下の入力欄に次を入力して Enter を押します。入力欄の左のドロップダウンは **「Cmd」** のままにします（「Python」を選んだ場合は、先頭の `py ` を外して入力します）。
 
 ```
-py "<リポジトリ>/3dsim/MiniAI_PySim/tools/check_env.py"
+py import m4wd_drive as D; D.check_env()
 ```
+
+- **結果は画面には出ません。** 入力欄の左にある **「出力ログ」** ボタンを押してログを開くと、`[M4WD check]` で始まる行が並んでいます。Enter を押しても何も起きないように見えるのは、このためです。
+- `D.check_env()` は、**今開いているプロジェクトと同じリポジトリ**の `check_env.py` を実行します。パスを打つ必要はありません。
+- 起動時のエラーなどで `m4wd_drive` が読み込まれていない場合は、`import m4wd_drive` でエラーになります。そのときは、パスを指定して直接実行します（`<リポジトリ>` は、開いているプロジェクトがあるリポジトリ）。
+
+  ```
+  py "<リポジトリ>/3dsim/MiniAI_PySim/tools/check_env.py"
+  ```
 
 - 次の項目を確認し、`[OK]` / `[NG]` で表示します。
   - ファイルがそろっているか
@@ -143,7 +151,7 @@ py "<リポジトリ>/3dsim/MiniAI_PySim/tools/check_env.py"
 |---|---|
 | UE を開いたときに「マップのロードに失敗しました … はアセットファイルのようです」／LFS のファイルが中身のない状態 | LFS の本体がありません。ZIP で入手した場合は `git clone` し直す。clone した場合は `git lfs pull` を実行する |
 | ファイル … が見つからない | `git clone` と `git lfs pull` が最後まで終わったか確認する。`git status` で、ファイルが消えていないかを見る |
-| 読み込まれた m4wd_drive.py がこのパッケージのものでない／MiniYonkuSim と MiniAI_PySim が同じ 3dsim フォルダにない（表示されたプロジェクトのパスが `<リポジトリ>` と違う） | 別の場所の `MiniYonkuSim` を開いている。エディタを閉じ、`<リポジトリ>\3dsim\MiniYonkuSim\MiniYonkuSim.uproject` をエクスプローラーで開き直す |
+| 読み込まれた m4wd_drive.py がこのパッケージのものでない／MiniYonkuSim と MiniAI_PySim が同じ 3dsim フォルダにない | 開いているプロジェクトと、実行した `check_env.py` が別のコピーにある。**clone が複数あるとき**に起きる。`py import m4wd_drive as D; D.check_env()` で実行し直す。それでも NG なら、開くプロジェクトを間違えている（Epic ランチャーの一覧から開いた場合など）ので、使いたいリポジトリの `3dsim\MiniYonkuSim\MiniYonkuSim.uproject` をエクスプローラーで開き直す |
 | m4wd_drive が読み込まれていない／Content/Python/init_unreal.py がない | `git checkout -- 3dsim/MiniYonkuSim/Content/Python/init_unreal.py` で元に戻し、エディタを再起動する |
 | m4wd_drive に start_py がない | 古い `m4wd_drive.py` が読み込まれている。UE を閉じて `git pull` で最新にし、エディタを再起動する |
 | ランタイムが登録されていない | 出力ログで `py import m4wd_drive; m4wd_drive.register()` を実行する |
@@ -522,6 +530,7 @@ Vbat = Voc − R_int·d·I
 | 車が動かない | `io.duty` が 0（＝ブレーキ）のまま。`io.print` で状態を出して確かめる |
 | UE で `start_py` が見つからない | `m4wd_drive.py` が古い。`py import importlib, m4wd_drive; importlib.reload(m4wd_drive); m4wd_drive.register()` のあとに実行する |
 | UE で `ModuleNotFoundError: numpy` | UE の Python に入れる（3.1）か、標準ライブラリだけで書く |
+| コマンドを入力して Enter を押しても何も起きない | 結果は出力ログに出る。入力欄の左の「出力ログ」ボタンでログを開く。ドロップダウンが「Python」になっている場合は、先頭の `py ` を外す |
 | Play しても車が動かない・HUD が出ない | 4.1 の環境チェックを実行し、NG を 4.2 で直す |
 | キーを押しても反応しない | ゲーム画面を1回クリックする。マウスを解放するのは `Shift + F1` |
 | `start_py` で `FileNotFoundError` | パスを確認する。名前だけ渡す場合は `MiniAI_PySim/controllers/<名前>.py`、なければ `controllers/local/<名前>.py` を探す |

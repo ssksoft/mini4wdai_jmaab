@@ -9,17 +9,17 @@ git lfs install
 git clone https://github.com/ssksoft/mini4wdai_jmaab.git
 cd mini4wdai_jmaab && git lfs pull
 ```
-- **ZIP ダウンロード（Code → Download ZIP）は使わないでください。** LFS のファイル（UE のアセットなど）が中身のない数百バイトのファイルになり、UE で「マップのロードに失敗しました … はアセットファイルのようです」と出て開けません。
+- **ZIP ダウンロード（Code → Download ZIP）は使わないでください。** UE のアセットなど LFS のファイルが中身のない状態になり、UE で開けません。
 - `3dsim\MiniYonkuSim\MiniYonkuSim.uproject` を**エクスプローラーでダブルクリック**します。Epic ランチャーの一覧から開くと、別の場所のコピーが開くことがあります。
 
 ## 2. 環境チェック（初回だけ）
-画面下の**出力ログ**（Cmd 欄）に入力して Enter を押します。最後に「**結果: すべて OK**」と出れば準備完了です。NG が出たら `3dsim/docs/manual.md` 4.2 の表で直します。
+画面下の入力欄（**Cmd**）に入力して Enter。結果は**「出力ログ」ボタンで開くログ**に出ます。最後が「**結果: すべて OK**」なら準備完了、NG はマニュアル 4.2 で直します。
 ```
-py "<リポジトリ>/3dsim/MiniAI_PySim/tools/check_env.py"
+py import m4wd_drive as D; D.check_env()
 ```
 
 ## 3. 走らせる
-出力ログに入力し、**Play（▶）を押してから、ゲーム画面を1回クリック**します。2 秒止まってから走り出し、「**3周 完走**」と出ます（作成者の環境では 6.08 s）。
+同じ入力欄に入力し、**Play（▶）を押してから、ゲーム画面を1回クリック**します。2 秒止まってから走り出し、「**3周 完走**」と出ます（作成者の環境では 6.08 s）。
 ```
 py import m4wd_drive as D; D.start_py("lc_brake", laps=3)
 ```

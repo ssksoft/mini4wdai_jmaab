@@ -125,7 +125,8 @@ if have_ue:
         src = getattr(drv, "__file__", "")
         same = os.path.normcase(os.path.abspath(src)) == os.path.normcase(os.path.join(UE_DIR, "m4wd_drive.py"))
         item("読み込まれた m4wd_drive.py がこのパッケージのもの", same,
-             src if same else src + "  ← 別の場所のプロジェクトを開いています。<リポジトリ>/3dsim/MiniYonkuSim/MiniYonkuSim.uproject を開き直す")
+             src if same else src + "  ← 開いているプロジェクトとは別の場所の check_env.py を実行しています。"
+             "py import m4wd_drive as D; D.check_env() で実行し直してください")
         item("m4wd_drive に start_py がある（新しい版）", hasattr(drv, "start_py"),
              "" if hasattr(drv, "start_py") else "古い版です。UE を閉じて git pull で最新にし、エディタを再起動")
         root = getattr(drv, "PY_ROOT", None)
@@ -139,7 +140,10 @@ if have_ue:
         info("プロジェクト: " + proj)
         rel_ok = os.path.normcase(os.path.normpath(os.path.join(proj, ".."))) == os.path.normcase(os.path.normpath(DSIM))
         item("MiniYonkuSim と MiniAI_PySim が同じ 3dsim フォルダにある", rel_ok,
-             "3dsim = " + DSIM + ("" if rel_ok else "  ← 開いているのは別の場所の MiniYonkuSim です（Epic ランチャーの一覧から開いた場合など）"))
+             "3dsim = " + DSIM + ("" if rel_ok else
+             "  ← 開いているプロジェクトとこの check_env.py の場所が違います。開いているプロジェクトのチェックなら "
+             "py import m4wd_drive as D; D.check_env() で実行し直す。開くプロジェクトを間違えた場合は "
+             + os.path.join(DSIM, "MiniYonkuSim", "MiniYonkuSim.uproject") + " を開き直す"))
         ip = os.path.join(proj, "Content", "Python", "init_unreal.py")
         item("Content/Python/init_unreal.py がある", os.path.exists(ip), ip)
     except Exception as e:
