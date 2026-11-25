@@ -54,6 +54,34 @@ for rel in ("m4wd_drive.py", "m4wd_ctrl.py", "car_setup.py", "setup_in_ue.py"):
     p = os.path.join(UE_DIR, rel)
     item("ファイル mini4wd_course/ue/" + rel, os.path.exists(p), "" if os.path.exists(p) else "見つかりません: " + p)
 
+# ---------------------------------------------------------------- 2b. LFS files really downloaded (not pointer stubs)
+def _lfs_stubs(folder, exts=(".uasset", ".umap", ".fbx")):
+    stubs, total = [], 0
+    for root, _dirs, files in os.walk(folder):
+        for f in files:
+            if not f.lower().endswith(exts):
+                continue
+            total += 1
+            p = os.path.join(root, f)
+            try:
+                if os.path.getsize(p) < 1024:
+                    with open(p, "rb") as fh:
+                        if fh.read(40).startswith(b"version https://git-lfs"):
+                            stubs.append(os.path.relpath(p, DSIM))
+            except OSError:
+                pass
+    return stubs, total
+
+
+for rel in ("MiniYonkuSim/Content", "mini4wd_course/fbx"):
+    folder = os.path.join(DSIM, rel)
+    if not os.path.isdir(folder):
+        continue
+    stubs, total = _lfs_stubs(folder)
+    item("LFS の本体がある（%s, %d ファイル）" % (rel, total), not stubs,
+         "" if not stubs else "%d 個が中身のない引換券のままです（例: %s）。ZIP で入手した場合は git clone し直し、clone した場合は git lfs pull を実行"
+         % (len(stubs), stubs[0]))
+
 # ---------------------------------------------------------------- 3. model self-test (no UE needed)
 try:
     sys.path.insert(0, os.path.join(PYSIM, "sil"))

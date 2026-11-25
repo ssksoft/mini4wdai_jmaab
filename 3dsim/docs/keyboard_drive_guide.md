@@ -131,13 +131,13 @@ py import importlib, m4wd_drive; importlib.reload(m4wd_drive); m4wd_drive.regist
 ### 車を置き直す（車・カメラ・スタート位置を作り直す）
 
 ```
-py "C:/Users/sasat/Desktop/work/Mini4WDAI/mini4wdai/3dsim/mini4wd_course/ue/car_setup.py"
+py "<リポジトリ>/3dsim/mini4wd_course/ue/car_setup.py"
 ```
 
 ### コース全体を作り直す（レベルを作り直す）
 
 ```
-py "C:/Users/sasat/Desktop/work/Mini4WDAI/mini4wdai/3dsim/mini4wd_course/ue/setup_in_ue.py"
+py "<リポジトリ>/3dsim/mini4wd_course/ue/setup_in_ue.py"
 ```
 
 コースを作り直した後は、続けて `car_setup.py` も実行してください。
@@ -169,7 +169,7 @@ py "C:/Users/sasat/Desktop/work/Mini4WDAI/mini4wdai/3dsim/mini4wd_course/ue/setu
 `mini4wd_course/ue/build_course.py` の `LAYOUT` を書き換えるか、次のように引数で指定します。
 
 ```
-py "C:/Users/sasat/Desktop/work/Mini4WDAI/mini4wdai/3dsim/mini4wd_course/ue/build_course.py" "S,S,L,L,L,L,S,S,L,L,L,L"
+py "<リポジトリ>/3dsim/mini4wd_course/ue/build_course.py" "S,S,L,L,L,L,S,S,L,L,L,L"
 ```
 
 | 記号 | 部品 |
@@ -182,7 +182,7 @@ py "C:/Users/sasat/Desktop/work/Mini4WDAI/mini4wdai/3dsim/mini4wd_course/ue/buil
 部品を1つずつつなぐ場合は、最後の部品を選択した状態で次を実行します。
 
 ```
-py "C:/Users/sasat/Desktop/work/Mini4WDAI/mini4wdai/3dsim/mini4wd_course/ue/append_part.py" S
+py "<リポジトリ>/3dsim/mini4wd_course/ue/append_part.py" S
 ```
 
 実行後に、出力ログで「closed loop（コースが閉じた）」かどうかを確認できます。
@@ -250,7 +250,7 @@ py "C:/Users/sasat/Desktop/work/Mini4WDAI/mini4wdai/3dsim/mini4wd_course/ue/appe
 - レベルを作り直すときは、Cmd 欄で次を実行します（コースの並び・スタート位置は `scenario_courseout.py` の `LAYOUT` / `START_PIECE`）。
 
 ```
-py "C:/Users/sasat/Desktop/work/Mini4WDAI/mini4wdai/3dsim/mini4wd_course/ue/scenario_courseout.py"
+py "<リポジトリ>/3dsim/mini4wd_course/ue/scenario_courseout.py"
 ```
 
 - 手動走行のコース（`Mini4WD_Oval`）を起動時に開くようにしたい場合は、`MiniYonkuSim/Config/DefaultEngine.ini` の `GameDefaultMap` と `EditorStartupMap` を `Mini4WD_Oval` に戻してください。

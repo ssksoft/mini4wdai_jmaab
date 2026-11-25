@@ -12,7 +12,7 @@
 
 | ドキュメント | 内容 |
 |---|---|
-| [../README.md](../README.md) | クイックスタート（リポジトリ直下の README。印刷用 PDF は [Releases](https://github.com/ssksoft/mini4wdai/releases) に添付） |
+| [../README.md](../README.md) | クイックスタート（リポジトリ直下の README。印刷用 PDF は [Releases](https://github.com/ssksoft/mini4wdai_jmaab/releases) に添付） |
 | [docs/manual.md](docs/manual.md) | 使い方マニュアル（制御の書き方、パラメーター、カスタマイズの編集ポイント、精度と限界） |
 | [docs/verification_checklist.md](docs/verification_checklist.md) | 別の人が再現できるかを確かめるチェックシート |
 | [docs/keyboard_drive_guide.md](docs/keyboard_drive_guide.md) | キーボード走行・コース作成の操作ガイド |
@@ -41,6 +41,7 @@
 ## Git の使い方
 
 - UE のアセット（`.uasset` / `.umap`）、FBX、画像は **Git LFS** で管理しています（`3dsim/.gitattributes`）。最初に PC ごとに1回、`git lfs install` を実行してください。
+- GitHub の **Download ZIP では LFS の本体が入りません**（数百バイトの「引換券」だけになり、UE で開けません）。必ず `git clone` → `git lfs pull` で入手してください。
 - UE が作るフォルダ（`Binaries` `Intermediate` `Saved` `DerivedDataCache`）と、個人用の制御（`MiniAI_PySim/controllers/local/`）は Git に入りません（`3dsim/.gitignore`）。
 - **コミットする前に**：UE で保存（Ctrl+Shift+S）し、UE を閉じてからにします。
 - **バイナリのアセット**はマージできません。複数人で同じアセットを触るときは、`git lfs lock <ファイル>` でロックしてください。

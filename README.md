@@ -1,14 +1,15 @@
-# mini4wdai — クイックスタート（ミニ四駆 Python制御シミュレーター）
+# mini4wdai_jmaab — クイックスタート（ミニ四駆 Python制御シミュレーター）
 
 市販ミニ四駆 ＋ XIAO MG24 Sense ＋ KEIMYO-001 を、Python で書いた制御で UE のコース上で走らせます。詳しくは [3dsim/docs/manual.md](3dsim/docs/manual.md) を見てください。
-**用意するもの**：Windows PC ／ Unreal Engine 5.8 ／ Git for Windows（Git LFS 同梱）／ リポジトリ `ssksoft/mini4wdai` へのアクセス権
+**用意するもの**：Windows PC ／ Unreal Engine 5.8 ／ Git for Windows（Git LFS 同梱）／ リポジトリ `ssksoft/mini4wdai_jmaab` へのアクセス権
 
 ## 1. 入手する・開く
 ```
 git lfs install
-git clone https://github.com/ssksoft/mini4wdai.git
-cd mini4wdai && git lfs pull
+git clone https://github.com/ssksoft/mini4wdai_jmaab.git
+cd mini4wdai_jmaab && git lfs pull
 ```
+- **ZIP ダウンロード（Code → Download ZIP）は使わないでください。** LFS のファイル（UE のアセットなど）が中身のない数百バイトのファイルになり、UE で「マップのロードに失敗しました … はアセットファイルのようです」と出て開けません。
 - `3dsim\MiniYonkuSim\MiniYonkuSim.uproject` を**エクスプローラーでダブルクリック**します。Epic ランチャーの一覧から開くと、別の場所のコピーが開くことがあります。
 
 ## 2. 環境チェック（初回だけ）
@@ -44,6 +45,7 @@ py import m4wd_drive as D; D.start_py("lc_brake", motor="machdash_pro", params={
 
 ## 結果と困ったとき
 - **結果**：`3dsim\MiniYonkuSim\Saved\PySim\<名前>_<日時>\`（`log.csv` ・ `serial.txt` ・ `summary.json`）
+- **「マップのロードに失敗しました」**：LFS の本体がありません。ZIP で入手した場合は clone し直し、clone した場合は `git lfs pull` を実行します。
 - **車が動かない・HUD が出ない**：手順 2 の環境チェックを実行します。
 - **キーが効かない**：ゲーム画面をクリックします（マウスを解放するのは `Shift+F1`）。
 - **赤字の「コントローラーエラー」**：表示された行を直して `R` を押します。

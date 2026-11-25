@@ -9,7 +9,7 @@
 - 制御が決めるのは、モーターの PWM デューティ（PC2）です。
 - KEIMYO-001・電池・モーターのモデルがデューティを駆動力に変え、車がコースを走ります。
 - 制御ファイルを保存して `R` キーを押すだけで、新しい制御で走り直せます。
-- 実行する場所は **UE 5.8** の UE プロジェクト `MiniYonkuSim`（リポジトリ `mini4wdai` に含まれる）です。3D のコース上で走りを見られます。
+- 実行する場所は **UE 5.8** の UE プロジェクト `MiniYonkuSim`（リポジトリ `mini4wdai_jmaab` に含まれる）です。3D のコース上で走りを見られます。
 
 ---
 
@@ -20,9 +20,9 @@
 | Windows 10 / 11 の PC | UE 5.8 が動くもの（独立 GPU を推奨） |
 | Unreal Engine 5.8 | Epic Games Launcher からインストールする |
 | Git ／ Git LFS | https://git-scm.com/ から Git for Windows をインストールする（Git LFS も同梱） |
-| リポジトリ `ssksoft/mini4wdai` へのアクセス権 | 非公開リポジトリの場合は、管理者に招待してもらう |
+| リポジトリ `ssksoft/mini4wdai_jmaab` へのアクセス権 | 非公開リポジトリの場合は、管理者に招待してもらう |
 
-- このマニュアルでは、リポジトリを置いたフォルダを `<リポジトリ>` と書きます（例：`D:\work\mini4wdai`）。
+- このマニュアルでは、リポジトリを置いたフォルダを `<リポジトリ>` と書きます（例：`D:\work\mini4wdai_jmaab`）。
 - **パスに日本語や空白を含まないフォルダ**に置くことを推奨します。
 - 1ページ版の手順は、リポジトリ直下の `README.md`（クイックスタート）にあります。再現できるかを確かめる場合は `docs/verification_checklist.md` に沿って進めてください。
 
@@ -54,17 +54,18 @@
 ```bat
 cd /d D:\work
 git lfs install
-git clone https://github.com/ssksoft/mini4wdai.git
-cd mini4wdai
+git clone https://github.com/ssksoft/mini4wdai_jmaab.git
+cd mini4wdai_jmaab
 git lfs pull
 ```
 
 - `git lfs install` は PC ごとに最初の1回だけ必要です。
+- **ZIP ダウンロード（Code → Download ZIP）は使わないでください。** LFS のファイル（UE のアセットなど）が中身のない数百バイトのファイルになり、UE で「マップのロードに失敗しました … はアセットファイルのようです」と出て開けません。
 - UE のアセット（`.uasset` / `.umap`）やコース部品の FBX は **Git LFS** で管理しています。`git lfs pull` が終わっていないと、UE でレベルが開けません。
 - 最新版にするときは、`git pull` を実行します（UE を閉じてから実行してください）。
 
 ```
-mini4wdai/
+mini4wdai_jmaab/
 ├─ README.md                     … クイックスタート（1ページ版の手順。PDF は GitHub の Releases に添付）
 └─ 3dsim/
     ├─ README.md                     … 3dsim の概要・フォルダ構成・Git の使い方
@@ -140,6 +141,7 @@ py "<リポジトリ>/3dsim/MiniAI_PySim/tools/check_env.py"
 
 | NG の項目 | 直し方 |
 |---|---|
+| UE を開いたときに「マップのロードに失敗しました … はアセットファイルのようです」／LFS のファイルが中身のない状態 | LFS の本体がありません。ZIP で入手した場合は `git clone` し直す。clone した場合は `git lfs pull` を実行する |
 | ファイル … が見つからない | `git clone` と `git lfs pull` が最後まで終わったか確認する。`git status` で、ファイルが消えていないかを見る |
 | 読み込まれた m4wd_drive.py がこのパッケージのものでない／MiniYonkuSim と MiniAI_PySim が同じ 3dsim フォルダにない（表示されたプロジェクトのパスが `<リポジトリ>` と違う） | 別の場所の `MiniYonkuSim` を開いている。エディタを閉じ、`<リポジトリ>\3dsim\MiniYonkuSim\MiniYonkuSim.uproject` をエクスプローラーで開き直す |
 | m4wd_drive が読み込まれていない／Content/Python/init_unreal.py がない | `git checkout -- 3dsim/MiniYonkuSim/Content/Python/init_unreal.py` で元に戻し、エディタを再起動する |
