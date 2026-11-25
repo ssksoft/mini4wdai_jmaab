@@ -1,0 +1,29 @@
+# --- Unreal Engine: generated / per-machine folders (rebuilt automatically) ---
+MiniYonkuSim/Binaries/
+MiniYonkuSim/Build/
+MiniYonkuSim/DerivedDataCache/
+MiniYonkuSim/Intermediate/
+MiniYonkuSim/Saved/
+MiniYonkuSim/.vs/
+MiniYonkuSim/*.sln
+MiniYonkuSim/*.VC.db
+# per-user content folders
+MiniYonkuSim/Content/Developers/
+MiniYonkuSim/Content/Collections/
+
+# --- Python ---
+__pycache__/
+*.pyc
+
+# --- backups ---
+*.bak*
+
+# --- Python control: personal controllers (only the README is tracked) ---
+MiniAI_PySim/controllers/local/*
+!MiniAI_PySim/controllers/local/README.md
+
+# --- generated docs / distribution archives / local run outputs ---
+docs/_build/
+*.zip
+sim_out/
+.pytest_cache/
