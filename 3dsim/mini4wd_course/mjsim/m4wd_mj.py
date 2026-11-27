@@ -93,6 +93,7 @@ def _course():
     man = json.load(open(os.path.join(d, "parts_manifest.json")))
     placed, _ = build_layout(man, LAYOUT.split(","))
     hulls, cache = [], {}
+    _HULL_PART.clear()
     _COLORS.clear()
     curve_i = 0
     for part, W in placed:
@@ -104,7 +105,7 @@ def _course():
             cache[part] = [v for k, v in sorted(read_fbx(os.path.join(d, man["parts"][part]["file"])).items()) if k.startswith("UCX_")]
         for V, _ in cache[part]:
             Vw = xform(V, W) * [0.01, -0.01, 0.01]            # UE cm -> RH m
-            hulls.append(Vw); _COLORS.append(col)
+            hulls.append(Vw); _COLORS.append(col); _HULL_PART.append(part)
     return placed, hulls
 
 
@@ -115,6 +116,7 @@ def _ue_xf(W):
 
 _COURSE = None
 _COLORS = []
+_HULL_PART = []                                    # course part name of each hull (same order as hulls)
 
 
 def course():
@@ -125,8 +127,16 @@ def course():
         f = np.array([math.cos(yaw), math.sin(yaw), 0.0]); left = np.array([-f[1], f[0], 0.0])
         allv = np.vstack(hulls)
         lc_up = _ue_xf(placed[0][1])[0]                       # foot of the up ramp region
+        # centre of the lane-change bases (bounds centre of each base, averaged; as m4wd_drive._course_info in UE)
+        bases = [i for i, (part, _) in enumerate(placed) if part == "LaneChange_Base"]
+        lc_c = None
+        pts = [h for h, part in zip(hulls, _HULL_PART) if part == "LaneChange_Base"]
+        if pts:
+            half = len(pts) // len(bases) if bases else len(pts)
+            groups = [np.vstack(pts[j:j + half]) for j in range(0, len(pts), half)]
+            lc_c = np.mean([(g.min(0) + g.max(0)) / 2.0 for g in groups], axis=0)
         _COURSE = dict(placed=placed, hulls=hulls, fin_p=p, fin_f=f, fin_l=left,
-                       lo=allv.min(0), hi=allv.max(0), lc=lc_up)
+                       lo=allv.min(0), hi=allv.max(0), lc=lc_up, lc_c=lc_c)
     return _COURSE
 
 

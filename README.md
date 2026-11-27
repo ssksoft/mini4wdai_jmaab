@@ -30,7 +30,7 @@ headless lc_brake --plot
 ```
 最後に「**結果: 完走 合計 5.803 s**」と出ます（標準モーター、3周）。結果は `sim_out\lc_brake\` にできます（`plot.png` 速度・デューティ・電流などのグラフ ／ `log.csv` ／ `summary.json` ／ `serial.txt`）。
 - **条件を変える**：`--motor standard`（既定）／`machdash_pro` 　`--battery nimh2`（既定）／`liion1` 　`--param 名前=値`（制御の調整値の上書き）　`--laps 5`（周回数、既定 3）。例：`headless lc_brake --motor machdash_pro --param RUN_DUTY=0.7`
-- **3D で見る**：`headless lc_brake --view` で、走ったあとに 3D ビューアの窓で再生します。`--video` なら `run.mp4` に書き出します。前回の走行は `headless view lc_brake` で見直せます。
+- **3D で見る**：`headless lc_brake --view` で、走ったあとに 3D ビューアの窓で再生します。`--video` なら、実機の動画と同じ画角で `run.mp4` に書き出します。前回の走行は `headless view lc_brake` で見直せます。
 - **総当たり**：`headless sweep lc_brake --param BRAKE_S=0.08,0.12,0.16 --param LEAD_DEG=20,30,40 --seeds 0,1,2` で全組み合わせを走らせ、完走数・平均タイムの表と最速の組み合わせを出します。
 
 ## 3. 自分の制御を書く

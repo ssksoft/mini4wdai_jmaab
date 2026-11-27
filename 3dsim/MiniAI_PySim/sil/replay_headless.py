@@ -5,7 +5,13 @@ run_headless.py records the car pose at 60 Hz into <out>/replay.npz on every run
 on the same MuJoCo model, so nothing is simulated again (the result is exactly the run you got).
 
     headless view  [name | folder] [--speed 0.5] [--loop]        viewer window (mouse: rotate / zoom / pan)
-    headless video [name | folder] [--cam follow|top] [--fps 30] [--size 1280x720] [--speed 1] [-o file.mp4]
+    headless video [name | folder] [--cam real|follow|top] [--fps 30] [--size 1280x720] [--speed 1] [-o file.mp4]
+
+Cameras: real   = the angle of the real test video (and of the UE scenario "overview" camera): standing on the
+                  lane-change side, high, looking across the oval -> lane change at the bottom, the start
+                  (middle of the far straight) at the top
+         follow = behind the car, turning with it
+         top    = the whole course from above, same orientation as real
 
 name = a controller name (-> sim_out/<name>), or the folder given to --out. Default: lc_brake.
 """
@@ -100,13 +106,39 @@ def frame_at(rec, t_sim):
 
 
 # ------------------------------------------------------------------ cameras
+# the real test video / UE m4wd_drive._camera("overview"): 1.50 m out from the course centre towards the
+# lane change, 2.15 m above the floor, looking at a point 8 cm from the centre; horizontal field of view 70 deg
+REAL_OUT, REAL_UP, REAL_LOOK, REAL_HFOV = 1.50, 2.15, 0.08, 70.0
+
+
 def course_view(MJ):
     import numpy as np
     C = MJ.course()
     lo, hi = np.array(C["lo"], float), np.array(C["hi"], float)
     centre = (lo + hi) / 2.0
     span = float(max(hi[0] - lo[0], hi[1] - lo[1]))
-    return centre, span
+    lc = C.get("lc_c")
+    dvec = np.array([0.0, 1.0]) if lc is None else np.array(lc[:2], float) - centre[:2]
+    dvec = dvec / (np.linalg.norm(dvec) or 1.0)            # course centre -> lane change (floor plane)
+    return dict(centre=centre, span=span, d=dvec)
+
+
+def fovy_for(width, height):
+    """vertical field of view [deg] that gives the UE camera's 70 deg horizontal view at this aspect ratio"""
+    return math.degrees(2 * math.atan(math.tan(math.radians(REAL_HFOV / 2)) * height / float(width)))
+
+
+def set_real(cam, cv):
+    import numpy as np
+    c, d = cv["centre"], cv["d"]
+    pos = np.array([c[0] + d[0] * REAL_OUT, c[1] + d[1] * REAL_OUT, REAL_UP])
+    look = np.array([c[0] + d[0] * REAL_LOOK, c[1] + d[1] * REAL_LOOK, 0.0])
+    v = look - pos
+    cam.type = 0
+    cam.lookat[:] = look
+    cam.distance = float(np.linalg.norm(v))
+    cam.azimuth = math.degrees(math.atan2(v[1], v[0]))
+    cam.elevation = math.degrees(math.atan2(v[2], math.hypot(v[0], v[1])))
 
 
 def set_follow(cam, qpos, state):
@@ -124,14 +156,17 @@ def set_follow(cam, qpos, state):
     cam.azimuth = math.degrees(state["yaw"])
 
 
-def set_top(cam, centre, span):
+def set_top(cam, cv):
+    """straight down, oriented like the real view (lane change at the bottom)"""
+    c, d = cv["centre"], cv["d"]
     cam.type = 0
-    cam.lookat[:] = [centre[0], centre[1], 0.0]
-    cam.distance, cam.elevation, cam.azimuth = span * 1.05, -62.0, 90.0
+    cam.lookat[:] = [c[0], c[1], 0.0]
+    cam.distance, cam.elevation = cv["span"] * 1.35, -89.9
+    cam.azimuth = math.degrees(math.atan2(-d[1], -d[0]))
 
 
 # ------------------------------------------------------------------ viewer
-def view(out, speed=1.0, loop=False):
+def view(out, speed=1.0, loop=False, cam="real"):
     import mujoco
     import mujoco.viewer
     rec = load(out)
@@ -149,10 +184,16 @@ def view(out, speed=1.0, loop=False):
 
     print("ビューア：スペース 一時停止 ／ R 最初から ／ マウス 左ドラッグ 回転・右ドラッグ 移動・ホイール 拡大 ／ 窓を閉じて終了")
     print("記録：%s（%.2f s、%s）" % (out, T, OUTCOME_JA.get(rec["outcome"], rec["outcome"])))
+    m.vis.global_.fovy = fovy_for(16, 9)
     with mujoco.viewer.launch_passive(m, d, key_callback=key, show_left_ui=False, show_right_ui=False) as v:
-        v.cam.type = mujoco.mjtCamera.mjCAMERA_TRACKING
-        v.cam.trackbodyid = bid
-        v.cam.distance, v.cam.elevation = 0.6, -30.0
+        if cam == "follow":
+            v.cam.type = mujoco.mjtCamera.mjCAMERA_TRACKING
+            v.cam.trackbodyid = bid
+            v.cam.distance, v.cam.elevation = 0.6, -30.0
+        elif cam == "top":
+            set_top(v.cam, course_view(MJ))
+        else:
+            set_real(v.cam, course_view(MJ))
         t_sim, last, shown = 0.0, time.time(), -1
         while v.is_running():
             now = time.time()
@@ -180,7 +221,7 @@ def view(out, speed=1.0, loop=False):
 
 
 # ------------------------------------------------------------------ video
-def video(out, path=None, cam="follow", fps=30, size=(1280, 720), speed=1.0, quiet=False):
+def video(out, path=None, cam="real", fps=30, size=(1280, 720), speed=1.0, quiet=False):
     import numpy as np
     import mujoco
     try:
@@ -194,19 +235,20 @@ def video(out, path=None, cam="follow", fps=30, size=(1280, 720), speed=1.0, qui
     W, H = size
     m.vis.global_.offwidth = max(m.vis.global_.offwidth, W)
     m.vis.global_.offheight = max(m.vis.global_.offheight, H)
+    m.vis.global_.fovy = fovy_for(W, H)
     d = mujoco.MjData(m)
     try:
         r = mujoco.Renderer(m, H, W)
     except Exception as e:
         raise ReplayError("3D の描画を始められませんでした（%s）。Linux で画面がない場合は MUJOCO_GL=egl を設定してください。" % e)
     camera = mujoco.MjvCamera()
-    centre, span = course_view(MJ)
+    cv = course_view(MJ)
     font = _font(max(14, H // 34))
     path = path or os.path.join(out, "run.mp4")
     T = float(rec["t"][-1])
     n = int(math.ceil((T / speed + 1.0) * fps))        # +1 s still frame at the end
     state = {}
-    wr = imageio.get_writer(path, fps=fps, codec="libx264", quality=7, macro_block_size=8,
+    wr = imageio.get_writer(path, fps=fps, codec="libx264", quality=7, macro_block_size=2,
                             ffmpeg_log_level="error", pixelformat="yuv420p")
     try:
         for k in range(n):
@@ -214,9 +256,11 @@ def video(out, path=None, cam="follow", fps=30, size=(1280, 720), speed=1.0, qui
             d.qpos[:7] = rec["qpos"][i]
             mujoco.mj_forward(m, d)
             if cam == "top":
-                set_top(camera, centre, span)
-            else:
+                set_top(camera, cv)
+            elif cam == "follow":
                 set_follow(camera, rec["qpos"][i], state)
+            else:
+                set_real(camera, cv)
             r.update_scene(d, camera)
             img = Image.fromarray(r.render())
             dr = ImageDraw.Draw(img)
@@ -251,9 +295,11 @@ def main_view(argv=None):
     ap.add_argument("run", nargs="?", default="lc_brake", help="制御の名前（sim_out/<名前>）か、--out で指定したフォルダ")
     ap.add_argument("--speed", type=float, default=1.0, help="再生の速さ（0.25 = 1/4 倍速）")
     ap.add_argument("--loop", action="store_true", help="最後まで行ったら最初から繰り返す")
+    ap.add_argument("--cam", choices=("real", "follow", "top"), default="real",
+                    help="最初の視点：real = 実機の動画と同じ画角（既定）／ follow = 車を追う ／ top = 真上から")
     a = ap.parse_args(argv)
     try:
-        view(resolve_out(a.run), a.speed, a.loop)
+        view(resolve_out(a.run), a.speed, a.loop, a.cam)
     except ReplayError as e:
         print("エラー:", e); return 1
     return 0
@@ -262,7 +308,8 @@ def main_view(argv=None):
 def main_video(argv=None):
     ap = argparse.ArgumentParser(prog="headless video", description="走行を MP4 動画にします（画面は出ません）")
     ap.add_argument("run", nargs="?", default="lc_brake", help="制御の名前（sim_out/<名前>）か、--out で指定したフォルダ")
-    ap.add_argument("--cam", choices=("follow", "top"), default="follow", help="follow = 車の後ろから追う ／ top = コース全体")
+    ap.add_argument("--cam", choices=("real", "follow", "top"), default="real",
+                    help="real = 実機の動画と同じ画角（既定）／ follow = 車の後ろから追う ／ top = コース全体を真上から")
     ap.add_argument("--fps", type=int, default=30)
     ap.add_argument("--size", default="1280x720", help="幅x高さ")
     ap.add_argument("--speed", type=float, default=1.0, help="再生の速さ（0.5 = スロー）")

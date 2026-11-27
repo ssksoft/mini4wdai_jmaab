@@ -85,8 +85,9 @@ def main(argv=None):
     ap.add_argument("--out", default=None, help="output folder (default: 3dsim/MiniAI_PySim/sim_out/<controller>)")
     ap.add_argument("--plot", action="store_true", help="also write plot.png (speed, duty, current, gyro)")
     ap.add_argument("--view", action="store_true", help="after the run, replay it in the MuJoCo 3D viewer window")
-    ap.add_argument("--video", nargs="?", const="follow", choices=("follow", "top"), default=None,
-                    help="after the run, write run.mp4 (camera: follow = behind the car [default], top = whole course)")
+    ap.add_argument("--video", nargs="?", const="real", choices=("real", "follow", "top"), default=None,
+                    help="after the run, write run.mp4 (camera: real = angle of the real test video [default], "
+                         "follow = behind the car, top = whole course from above)")
     ap.add_argument("--quiet", action="store_true", help="print nothing (for scripts; see the returned dict / summary.json)")
     a = ap.parse_args(argv)
     say = (lambda *x: None) if a.quiet else print

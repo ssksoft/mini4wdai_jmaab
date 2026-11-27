@@ -13,7 +13,7 @@
   - `mini4wd_course/mjsim/m4wd_mj.py`（コースと車のモデル）、`MiniAI_PySim/sil/run_headless.py`（実行の本体）
   - `MiniAI_PySim/setup_headless.bat`：専用環境（`.venv`）の作成、パッケージの導入、環境チェックまで一度に行います。
   - `MiniAI_PySim/headless.bat`：`headless check`（環境チェック）、`headless <制御>`（実行）、`headless sweep`（パラメーター探索）
-- 3D 再生：走ったあとに MuJoCo のビューアで再生（`--view` / `headless view`）、または MP4 動画に書き出し（`--video` / `headless video`、視点は車を追う `follow` とコース全体の `top`）。走行の記録 `replay.npz` を毎回残し、再生ではシミュレーションをやり直しません（`sil/replay_headless.py`）。動画用に `imageio`・`imageio-ffmpeg` を追加。
+- 3D 再生：走ったあとに MuJoCo のビューアで再生（`--view` / `headless view`）、または MP4 動画に書き出し（`--video` / `headless video`。視点は、実機の試走動画・UE の再現シナリオと同じ画角の `real`（既定。レーンチェンジが手前、スタート地点が奥）、車を追う `follow`、真上からの `top`）。走行の記録 `replay.npz` を毎回残し、再生ではシミュレーションをやり直しません（`sil/replay_headless.py`）。動画用に `imageio`・`imageio-ffmpeg` を追加。
   - `requirements-headless.txt`：MuJoCo は 4.0.1 に固定（版によって、ぎりぎりの走行の結果が変わるため）。Python は 3.11〜3.13。
 - クイックスタート（リポジトリ直下の `README.md`）をヘッドレス版と統合し、**まずヘッドレス版で動作を確かめる**順に組み替えました（UE のインストールが不要で軽く、ライセンスの確認も要らないため）。PDF は2ページ（1ページ目：ヘッドレス版、2ページ目：UE 版）。
 - clone の手順を、ヘッドレス版に要るコース部品の FBX だけを LFS から取る形にしました（UE のデータは使うときに `git lfs pull`）。

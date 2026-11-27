@@ -175,7 +175,7 @@ headless lc_brake
 | `--timeout` | `20` | シミュレーション時間 [s]。超えたら打ち切る |
 | `--plot` | — | `plot.png` も作る |
 | `--view` | — | 走ったあとに 3D ビューアの窓で再生する（4.5） |
-| `--video [follow\|top]` | — | 走ったあとに `run.mp4` を作る。`follow` = 車の後ろから追う（既定）、`top` = コース全体（4.5） |
+| `--video [real\|follow\|top]` | — | 走ったあとに `run.mp4` を作る。視点は `real` = 実機の動画と同じ画角（既定）、`follow` = 車の後ろから追う、`top` = 真上から（4.5） |
 | `--out` | `sim_out\<制御名>` | 出力先のフォルダ。**同じ制御名で実行すると上書き**されるので、残したいときは変える |
 | `--quiet` | — | 何も表示しない（スクリプトから呼ぶとき） |
 | `--course-dir` | `3dsim\mini4wd_course` | コースのデータの場所 |
@@ -211,7 +211,7 @@ print(r["outcome"], r["laps"], r["total"])
 headless lc_brake --view            走らせて、そのままビューアで再生
 headless lc_brake --video           走らせて、sim_out\lc_brake\run.mp4 を作る
 headless view lc_brake              前回の走行をビューアで再生（走らせ直さない）
-headless video lc_brake --cam top   前回の走行をコース全体の視点で動画にする
+headless video lc_brake --cam follow  前回の走行を、車を追う視点で動画にする
 ```
 
 **ビューア（`headless view`）**
@@ -223,19 +223,21 @@ headless video lc_brake --cam top   前回の走行をコース全体の視点�
 | 左ドラッグ ／ 右ドラッグ ／ ホイール | 視点を回す ／ 動かす ／ 拡大・縮小 |
 | 窓を閉じる | 終了 |
 
-- オプション：`--speed 0.25`（1/4 倍速。既定 1 = 実時間）、`--loop`（繰り返し再生）
-- 視点は車を追いかけます。左上に、時刻・速度・デューティ・周回が出ます。最後のコマには結果（`FINISHED` `COURSE OUT` など）が出ます。
+- オプション：`--speed 0.25`（1/4 倍速。既定 1 = 実時間）、`--loop`（繰り返し再生）、`--cam real|follow|top`（最初の視点。既定 `real`）
+- 左上に、時刻・速度・デューティ・周回が出ます。最後のコマには結果（`FINISHED` `COURSE OUT` など）が出ます。
 
 **動画（`headless video`）**
 
 | オプション | 既定値 | 内容 |
 |---|---|---|
-| `--cam` | `follow` | `follow` = 車の後ろから追う ／ `top` = コース全体を斜め上から |
+| `--cam` | `real` | `real` = 実機の動画と同じ画角 ／ `follow` = 車の後ろから追う ／ `top` = コース全体を真上から（`real` と同じ向き） |
 | `--speed` | `1` | 再生の速さ（`0.5` = 1/2 倍速のスロー） |
 | `--fps` | `30` | 1 秒あたりのコマ数 |
 | `--size` | `1280x720` | 幅x高さ |
 | `-o` | `<フォルダ>\run.mp4` | 出力ファイル |
 
+- **`real` の画角**：実機の試走動画と同じく、レーンチェンジ側に立って、高い位置からコース全体を見下ろします。レーンチェンジが手前（画面の下）、スタート地点（奥の直線の中央、内側のレーン）が画面の上で、車は時計回りに走ります。UE 版の再現シナリオの最初のカメラ（`ue/m4wd_drive.py` の `_camera()` の `overview`）と同じ位置・向き・画角（水平 70°）です。
+- **スタート地点**：ヘッドレス版の車は、UE の再現シナリオ（`ue/scenario_courseout.py`）と同じく、実機の動画で車を離した位置（奥の直線の中央 `07_S`、内側のレーン、計測線の 2 cm 先）から走り出します。
 - 画面の上に、時刻・速度・デューティ・周回が入ります。終わりに 1 秒、最後のコマが止まって入ります。
 - 書き出しにかかる時間は PC の描画性能しだいです（GPU のある PC なら数秒。描画をソフトウェアで行う環境では 3周で 30 秒ほど）。
 - 走らせる名前の代わりに、`--out` で指定したフォルダや、`headless sweep` の `run_###` フォルダも指定できます。
@@ -349,7 +351,7 @@ headless sweep lc_brake --param BRAKE_S=0.08,0.12,0.16 --param LEAD_DEG=20,30,40
 | タイヤの横グリップの式 | `MiniAI_PySim/sil/run_headless.py` | `main()` の `for ax in (0.04, -0.04):`。**UE（`ue/m4wd_drive.py` の `_step`）にも同じ式がある**ので、片方だけ変えないこと |
 | 周回・コースアウト・停止の判定 | `MiniAI_PySim/sil/run_headless.py` | `main()` のループの終わり（`offtrack` `outside` `slow_t` `outcome = ...`）。条件は 4.3 |
 | グラフの内容 | `MiniAI_PySim/sil/run_headless.py` | `plot()` |
-| 3D 再生の視点・表示の文字 | `MiniAI_PySim/sil/replay_headless.py` | `set_follow()`（距離 `distance`・見下ろす角度 `elevation`）、`set_top()`、`caption()` |
+| 3D 再生の視点・表示の文字 | `MiniAI_PySim/sil/replay_headless.py` | 実機の画角は `REAL_OUT` `REAL_UP` `REAL_LOOK` `REAL_HFOV`（UE の `overview` と揃えてある）と `set_real()`、ほかに `set_follow()`（距離 `distance`・見下ろす角度 `elevation`）、`set_top()`、`caption()` |
 | 3D 再生の記録の細かさ | `MiniAI_PySim/sil/replay_headless.py` | `REC_HZ`（既定 60） |
 | コースや車の色・光 | `mini4wd_course/mjsim/m4wd_mj.py` | `build_model()` の `rgba`、`_COLORS`、`<light>`・`<headlight>` |
 | 環境チェックの試走の基準 | `MiniAI_PySim/tools/check_headless.py` | `REF_LAP1`（モデルを変えたら更新する） |
@@ -461,6 +463,6 @@ UE と結果を比べたいなら、UE のレベル（`ue/build_course.py` の `
 - **結果：** 9.3 の基準の結果
 - **探索：** 7章の実行例（27回）
 - **テスト：** 21件すべて合格
-- **3D 再生：** 動画（`follow` / `top`、完走とコースアウト）を書き出して中身を確認。ビューアは仮想ディスプレイ上で窓が開き、再生と表示の文字を確認
+- **3D 再生：** 動画（`real` / `follow` / `top`、完走とコースアウト）を書き出して中身を確認。ビューアは仮想ディスプレイ上で窓が開き、再生と表示の文字を確認
 
 Windows の MuJoCo 4.0.1 は、Python 3.11 / 3.12 / 3.13 用の配布物があることを確認しています。ただし、`setup_headless.bat` と `headless.bat`、ビューアの窓を Windows で実際に動かしての確認は、まだしていません。最初に使う人は、チェックシートと同じ要領で結果を記録してください。
