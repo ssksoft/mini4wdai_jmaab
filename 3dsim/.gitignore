@@ -22,6 +22,9 @@ __pycache__/
 MiniAI_PySim/controllers/local/*
 !MiniAI_PySim/controllers/local/README.md
 
+# --- headless (MuJoCo) simulator: per-machine virtual environment ---
+MiniAI_PySim/.venv/
+
 # --- generated docs / distribution archives / local run outputs ---
 docs/_build/
 *.zip

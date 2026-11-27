@@ -6,6 +6,24 @@
 - 機能を足したとき：マイナーを上げる
 - 不具合を直したとき：パッチを上げる
 
+## v1.1.0（2026-11-27）
+
+### 追加：ヘッドレス版（UE なし、Python ＋ MuJoCo）
+- UE を使わずに、同じコース・車・制御を MuJoCo で走らせる「ヘッドレス版」を戻しました（v47 まであったものを、今の構成に合わせて組み込み直し）。
+  - `mini4wd_course/mjsim/m4wd_mj.py`（コースと車のモデル）、`MiniAI_PySim/sil/run_headless.py`（実行の本体）
+  - `MiniAI_PySim/setup_headless.bat`：専用環境（`.venv`）の作成、パッケージの導入、環境チェックまで一度に行います。
+  - `MiniAI_PySim/headless.bat`：`headless check`（環境チェック）、`headless <制御>`（実行）、`headless sweep`（パラメーター探索）
+- 3D 再生：走ったあとに MuJoCo のビューアで再生（`--view` / `headless view`）、または MP4 動画に書き出し（`--video` / `headless video`、視点は車を追う `follow` とコース全体の `top`）。走行の記録 `replay.npz` を毎回残し、再生ではシミュレーションをやり直しません（`sil/replay_headless.py`）。動画用に `imageio`・`imageio-ffmpeg` を追加。
+  - `requirements-headless.txt`：MuJoCo は 4.0.1 に固定（版によって、ぎりぎりの走行の結果が変わるため）。Python は 3.11〜3.13。
+- クイックスタート（リポジトリ直下の `README.md`）をヘッドレス版と統合し、**まずヘッドレス版で動作を確かめる**順に組み替えました（UE のインストールが不要で軽く、ライセンスの確認も要らないため）。PDF は2ページ（1ページ目：ヘッドレス版、2ページ目：UE 版）。
+- clone の手順を、ヘッドレス版に要るコース部品の FBX だけを LFS から取る形にしました（UE のデータは使うときに `git lfs pull`）。
+- マニュアル詳細版：`docs/headless_manual.md`。
+- 自動テスト `tests/test_headless.py` を追加しました（MuJoCo がない環境ではスキップ）。GitHub Actions でもヘッドレス版のテストを実行します（LFS はコース部品の FBX だけを取得）。
+
+### 基準の結果（MuJoCo 4.0.1、lc_brake、ニッケル水素、3周）
+- 標準モーター：5.80 s（UE 5.8.4 では 6.08 s）
+- マッハダッシュPRO（`RUN_DUTY` 0.7）：5.00 s（UE では 5.09 s）
+
 ## v1.0.1（2026-11-25）
 
 - リポジトリを `ssksoft/mini4wdai_jmaab` に移しました（履歴は引き継いでいません。元は `ssksoft/mini4wdai`）。ドキュメントの clone 先とフォルダ名を直しました。

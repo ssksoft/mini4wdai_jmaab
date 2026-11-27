@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Build the one-page quickstart PDF from the repository root README.md (up to the <!-- pdf-end --> marker).
+"""Build the quickstart PDF (2 pages: headless version, then UE version) from the repository root README.md,
+up to the <!-- pdf-end --> marker.
 
-    python 3dsim/MiniAI_PySim/tools/build_docs.py [--out <folder>]
+    python 3dsim/MiniAI_PySim/tools/build_docs.py [--out <folder>]      -> quickstart.pdf
 
 Needs pandoc and a Chromium-based browser (Chrome / Edge / Chromium) on PATH, or set CHROME=<path>.
 The PDF is a build product: it is not committed; GitHub Actions attaches it to each Release.
@@ -54,19 +55,25 @@ def main():
     if not chrome:
         sys.exit("Chrome / Edge / Chromium が見つかりません（環境変数 CHROME でパスを指定できます）")
     os.makedirs(a.out, exist_ok=True)
+    for src, name in ((README, "quickstart"),):
+        if os.path.isfile(src):
+            build_one(src, name, a.out, chrome)
+
+
+def build_one(src_md, name, out_dir, chrome):
     with tempfile.TemporaryDirectory() as tmp:
         css = os.path.join(tmp, "s.css")
         with open(css, "w", encoding="utf-8") as fh:
             fh.write(CSS)
-        with open(README, encoding="utf-8") as fh:
+        with open(src_md, encoding="utf-8") as fh:
             text = fh.read().split("<!-- pdf-end")[0]
-        src = os.path.join(tmp, "quickstart.md")
+        src = os.path.join(tmp, name + ".md")
         with open(src, "w", encoding="utf-8") as fh:
             fh.write(text)
-        html = os.path.join(tmp, "quickstart.html")
-        subprocess.run(["pandoc", src, "-s", "--embed-resources", "--css", css,
+        html = os.path.join(tmp, name + ".html")
+        subprocess.run(["pandoc", "-f", "gfm", src, "-s", "--embed-resources", "--css", css,
                         "--metadata", "pagetitle=quickstart", "-o", html], check=True)
-        pdf = os.path.abspath(os.path.join(a.out, "quickstart.pdf"))
+        pdf = os.path.abspath(os.path.join(out_dir, name + ".pdf"))
         subprocess.run([chrome, "--headless", "--disable-gpu", "--no-sandbox", "--no-pdf-header-footer",
                         "--print-to-pdf=" + pdf, "file://" + html.replace("\\", "/")], check=True,
                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

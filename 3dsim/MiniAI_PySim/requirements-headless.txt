@@ -1,0 +1,11 @@
+# Headless (MuJoCo) simulator:  python -m pip install -r requirements-headless.txt   (setup_headless.bat does this)
+# Python 3.11 - 3.13 (MuJoCo 4.0.1 has no Windows package for 3.10).
+# MuJoCo is pinned: borderline runs (a car that only just stays on the track) can end differently on another version.
+# If you change it, re-check the reference results in docs/headless_manual.md (9.3) with "headless check" and a sweep.
+mujoco==4.0.1
+numpy>=1.26
+matplotlib>=3.8
+# 3D replay video (headless video / --video): imageio-ffmpeg brings its own ffmpeg
+imageio>=2.31
+imageio-ffmpeg>=0.5
+pytest>=7

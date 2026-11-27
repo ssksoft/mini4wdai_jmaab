@@ -1,5 +1,5 @@
-# 3dsim / Python control: model tests on every push and pull request,
-# and a GitHub Release with the quickstart PDF when a tag like v1.0.0 is pushed.
+# 3dsim / Python control: model tests + headless (MuJoCo) tests on every push and pull request,
+# and a GitHub Release with the quickstart PDFs when a tag like v1.0.0 is pushed.
 name: pysim
 
 on:
@@ -7,7 +7,9 @@ on:
     branches: [main]
     tags: ["v*"]
   pull_request:
-    paths: ["3dsim/MiniAI_PySim/**", "3dsim/docs/**", "README.md", ".github/workflows/pysim.yml"]
+    paths: ["3dsim/MiniAI_PySim/**", "3dsim/mini4wd_course/mjsim/**", "3dsim/mini4wd_course/generator/**",
+            "3dsim/mini4wd_course/ue/m4wd_ctrl.py", "3dsim/mini4wd_course/fbx/**", "3dsim/docs/**", "README.md",
+            ".github/workflows/pysim.yml"]
   workflow_dispatch:
 
 permissions:
@@ -19,11 +21,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          lfs: false            # the tests need no LFS assets (saves LFS bandwidth)
+          lfs: false            # no UE assets needed (saves LFS bandwidth)
+      - name: Fetch only the course FBX from LFS (about 0.7 MB, needed by the headless tests)
+        run: git lfs pull --include "3dsim/mini4wd_course/fbx/*"
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"   # same as Unreal Engine 5.8's embedded Python
-      - run: pip install pytest
+      - run: pip install -r 3dsim/MiniAI_PySim/requirements-headless.txt
       - run: pytest -q 3dsim/MiniAI_PySim/tests
 
   release:
@@ -36,7 +40,7 @@ jobs:
           lfs: false
       - name: Install pandoc and Japanese fonts
         run: sudo apt-get update && sudo apt-get install -y pandoc fonts-noto-cjk
-      - name: Build quickstart PDF
+      - name: Build quickstart PDFs
         run: python 3dsim/MiniAI_PySim/tools/build_docs.py --out dist
         env:
           CHROME: google-chrome
